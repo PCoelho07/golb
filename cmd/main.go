@@ -10,7 +10,8 @@ import (
 
 func main() {
 	serverListUrl := []string{"http://localhost:3000", "http://localhost:3001"}
-    lb := loadbalancer.NewLoadBalancer(serverListUrl)
+    rrStrategy := loadbalancer.NewRRStrategy(len(serverListUrl))
+    lb := loadbalancer.NewLoadBalancer(serverListUrl, rrStrategy)
 
 	mainServer := http.Server{
 		Addr:    ":8080",

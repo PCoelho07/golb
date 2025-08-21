@@ -9,14 +9,16 @@ import (
 )
 
 type LoadBalancer struct {
+    lbStrategy Strategy
 	proxies []*server.Server
     currentProxy int
 }
 
-func NewLoadBalancer(srvrList []string) *LoadBalancer {
+func NewLoadBalancer(srvrList []string, lbStrategy Strategy) *LoadBalancer {
     return &LoadBalancer{
         proxies: buildProxies(srvrList) ,
         currentProxy: 0,
+        lbStrategy: lbStrategy,
     }
 }
 
@@ -31,8 +33,10 @@ func buildProxies(srvrList []string) []*server.Server {
 }
 
 func (l *LoadBalancer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { 
-    log.Printf("request %s from %s", req.Body, req.RemoteAddr)
-    l.proxies[0].Proxy.ServeHTTP(rw, req)
+
+    srvIndex := l.lbStrategy.ChooseServer()
+    log.Printf("request to %d server", srvIndex)
+    l.proxies[srvIndex].Proxy.ServeHTTP(rw, req)
 }
 
 func (l *LoadBalancer) HealthCheck(duration time.Duration) {
