@@ -27,15 +27,19 @@ func NewServer(uri string) *Server {
     }
 }
 
-func (s *Server) IsNotAlive() {
+func (s *Server) SetIsNotAlive() {
     s.mu.Lock()
     s.isAlive = false
     s.mu.Unlock()
 }
 
-func (s *Server) IsAlive() {
+func (s *Server) SetIsAlive() {
     s.mu.Lock()
     s.isAlive = true
     s.mu.Unlock()
+}
+
+func (s *Server) IsAlive() bool {
+    return s.isAlive
 }
 

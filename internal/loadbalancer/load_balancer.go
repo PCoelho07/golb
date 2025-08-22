@@ -11,6 +11,7 @@ import (
 type LoadBalancer struct {
     lbStrategy Strategy
 	proxies []*server.Server
+    downProxies []*server.Server
     currentProxy int
 }
 
@@ -33,8 +34,13 @@ func buildProxies(srvrList []string) []*server.Server {
 }
 
 func (l *LoadBalancer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { 
-
     srvIndex := l.lbStrategy.ChooseServer()
+
+    if !l.proxies[srvIndex].IsAlive() {
+        srvIndex = l.lbStrategy.ChooseServer()
+        log.Printf("the server %d is down, choosing another server", srvIndex)
+    }
+
     log.Printf("request to %d server", srvIndex)
     l.proxies[srvIndex].Proxy.ServeHTTP(rw, req)
 }
@@ -47,10 +53,10 @@ func (l *LoadBalancer) HealthCheck(duration time.Duration) {
             _, err := http.Get(p.Url)
             if err != nil {
                 log.Printf("Server %s is down.", p.Url)
-                p.IsNotAlive()
+                p.SetIsNotAlive()
             } else {
                 log.Printf("Server %s is up.", p.Url)
-                p.IsAlive()
+                p.SetIsAlive()
             }
         }
     }

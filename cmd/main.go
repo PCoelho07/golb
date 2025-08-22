@@ -18,7 +18,7 @@ func main() {
 		Handler: lb,
 	}
 
-    go lb.HealthCheck(5 * time.Second)
+    go lb.HealthCheck(1 * time.Second)
 
 	if err := mainServer.ListenAndServe(); err != nil {
 		log.Fatalf("fail when attempt to listen: %s", err)
