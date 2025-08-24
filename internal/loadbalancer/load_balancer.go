@@ -15,6 +15,18 @@ type LoadBalancer struct {
     currentProxy int
 }
 
+type LoadBalancerConfig struct {
+    backendUrls []string
+}
+
+func (lConfig *LoadBalancerConfig) SetBackendUrls(backendUrls []string) {
+    lConfig.backendUrls = backendUrls
+}
+
+func (lConfig *LoadBalancerConfig) BackendUrls() []string {
+    return lConfig.backendUrls
+}
+
 func NewLoadBalancer(srvrList []string, lbStrategy Strategy) *LoadBalancer {
     return &LoadBalancer{
         proxies: buildProxies(srvrList) ,
