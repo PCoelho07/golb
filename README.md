@@ -16,6 +16,7 @@
 * ✅ **Round-robin** load balancing
 * ✅ **Reverse proxying** to multiple backends
 * ✅ **Basic health checks** (unhealthy backends are temporarily skipped)
+* ✅ **Configuration file support** (`golb.conf` for backend definitions)
 
 **Planned:** random, least‑connections, better logging/metrics, Docker support.
 
@@ -23,7 +24,7 @@
 
 ## ⚡ How it Works
 
-Incoming requests to the balancer are forwarded to backends using a simple **round‑robin** strategy. If a backend fails a health check, it won’t receive traffic until it becomes healthy again.
+Incoming requests to the balancer are forwarded to backends using a simple **round‑robin** strategy. If a backend fails a health check, it won’t receive traffic until it becomes healthy again. Backends are defined in a `golb.conf` file.
 
 ```
 Client  →  GoLB (8080)  →  [Backend1:3000, Backend2:3001]
@@ -43,6 +44,7 @@ Client  →  GoLB (8080)  →  [Backend1:3000, Backend2:3001]
              ├───────────────────┤
              │ Round‑robin       │
              │ Health checks     │
+             │ Config file       │
              └─┬───────────────┬─┘
                │               │
          HTTP  ▼               ▼  HTTP
@@ -77,6 +79,22 @@ This will start:
 
 ---
 
+## 🔎 Configuration
+
+Backends are defined in a simple config file called `golb.conf`. Example:
+
+```conf
+backends {
+  http://localhost:3000
+  http://localhost:3001
+  https://example.com
+}
+```
+
+GoLB will parse this file on startup and load the configured backends.
+
+---
+
 ## 🔎 Quick Demo (with simple backends)
 
 Start two quick static servers (example using Python):
@@ -89,7 +107,16 @@ python3 -m http.server 3000
 python3 -m http.server 3001
 ```
 
-Then start GoLB:
+Then configure your `golb.conf` like this:
+
+```conf
+backends {
+  http://localhost:3000
+  http://localhost:3001
+}
+```
+
+Run GoLB:
 
 ```bash
 make run
